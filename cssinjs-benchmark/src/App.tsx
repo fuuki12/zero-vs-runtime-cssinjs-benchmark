@@ -1,33 +1,45 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, Profiler } from "react";
 import { StyledComponent } from "../src/runtime/StyledComponent";
 import { TailwindComponent } from "./zeroruntime/TailwindComponent";
 
+const onRenderCallback: (
+  id: string,
+  phase: "mount" | "update",
+  actualDuration: number
+) => void = (id, phase, actualDuration) => {
+  console.log(id, phase, actualDuration);
+};
+
 export default function App() {
-  const [lib, setLib] = useState("styled");
+  const [lib, setLib] = useState<"styled" | "tailwind" | null>(null);
+  const [key, setKey] = useState(0);
 
-  const toggleLib = useCallback(() => {
-    setLib((prevLib) => (prevLib === "styled" ? "tailwind" : "styled"));
+  const activateStyled = useCallback(() => {
+    setLib("styled");
+    setKey((prevKey) => prevKey + 1);
   }, []);
 
-  // 初回レンダリング時に実行する。
-  useEffect(() => {
-    console.time("Rendering Time");
+  const activateTailwind = useCallback(() => {
     setLib("tailwind");
+    setKey((prevKey) => prevKey + 1);
   }, []);
-
-  // libの変更があった場合に実行する。
-  useEffect(() => {
-    if (lib === "tailwind") {
-      console.timeEnd("Rendering Time");
-    }
-  }, [lib]);
 
   return (
     <div>
-      <button onClick={toggleLib}>
-        Switch to {lib === "styled" ? "Tailwind" : "Styled"}
-      </button>
-      {lib === "styled" ? <StyledComponent /> : <TailwindComponent />}
+      <button onClick={activateStyled}>Activate StyledComponent</button>
+      <button onClick={activateTailwind}>Activate TailwindComponent</button>
+
+      {lib === "styled" && (
+        <Profiler key={key} id="StyledComponent" onRender={onRenderCallback}>
+          <StyledComponent />
+        </Profiler>
+      )}
+
+      {lib === "tailwind" && (
+        <Profiler key={key} id="TailwindComponent" onRender={onRenderCallback}>
+          <TailwindComponent />
+        </Profiler>
+      )}
     </div>
   );
 }
