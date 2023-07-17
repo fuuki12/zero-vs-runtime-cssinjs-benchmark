@@ -18,7 +18,7 @@ export const StyledComponent = () => {
         <div style={{ fontSize: "1.25rem", fontWeight: "500" }}>
           Styled Component
         </div>
-        {[...Array(10000)].map((_, i) => (
+        {[...Array(100000)].map((_, i) => (
           <p style={{ color: "#71717A" }} key={i}>
             You are using Styled Components for styling this component.
           </p>
